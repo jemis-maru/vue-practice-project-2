@@ -6,6 +6,9 @@
         <custom-dialog :show="isError" :isErr="true" title="Error" @close="closeDialog">
             <p>Something went wrong!</p>
         </custom-dialog>
+        <custom-dialog :show="confirmDialog" :isErr="true" :isConfirm="true" title="Warning" @close="closeDialog('cancel')" @userConfirm="confirmClicked">
+            <p>Click close to confirm!</p>
+        </custom-dialog>
         <container-card>
             <div>
                 <div class="logoutDiv">
@@ -38,6 +41,12 @@
                     </div>
                     <div class="secondCol">
                         <custom-button @click="saveData">Save</custom-button>
+                        <custom-button class="topMargin" @click="totalSum">Calculate</custom-button>
+                        <p class="topMargin">Total count: {{ totalCount }}</p>
+                        <input class="topMargin" type="number" v-model="pricePerDiamond">
+                        <custom-button class="topMargin" @click="totalAmount">Total</custom-button>
+                        <p class="topMargin">Total amount: {{ totalRupee }}</p>
+                        <custom-button :danger="true" class="topMargin" @click="clearClick">Clear All</custom-button>
                     </div>
                 </div>
             </div>
@@ -63,6 +72,11 @@ export default {
             changeCountArr: [],
             isError: false,
             isNoError: false,
+            totalCount: '',
+            pricePerDiamond: null,
+            totalRupee: '',
+            confirmDialog: false,
+            isUserConfirm: false,
         };
     },
     methods: {
@@ -72,41 +86,32 @@ export default {
         },
         monthChange(){
             this.isListVisible = true;
-            console.log(this.selectedMonth);
+            this.totalCount = '';
+            this.pricePerDiamond = null;
+            this.totalRupee = '';
             for(let user in this.userDetails){
                 if(user == 'month'){
-                    // console.log(this.userDetails[user]);
                     for(let month in this.userDetails[user]){
                         if(this.selectedMonth == month){
-                            console.log('getmonth '+month);
                             this.monthArr = this.userDetails[user][month];
                         }
                     }
                 }
             }
-            console.log(this.monthArr);
         },
         changeCount(ind){
-            console.log(ind);
-            console.log(this.$refs.input[ind].value);
             let changeCount = Number(this.$refs.input[ind].value);
             this.changeCountArr = JSON.parse(JSON.stringify(this.monthArr));
             this.changeCountArr[ind] = changeCount;
-            console.log(this.changeCountArr);
-            console.log(this.monthArr);
         },
         async saveData(){
-            console.log(Object.keys(this.userInfo)[0]);
             let monthsObj = {};
             for(let user in this.userDetails){
                 if(user == 'month'){
-                    console.log(this.userDetails[user]);
                     monthsObj = this.userDetails[user];
                 }
             }
-            console.log(monthsObj[this.selectedMonth]);
             monthsObj[this.selectedMonth] = this.changeCountArr;
-            console.log(monthsObj);
             let userId = Object.keys(this.userInfo)[0];
             let updatedUserData = {
                 [userId]: {
@@ -115,7 +120,6 @@ export default {
                     userName: this.userDetails.userName,
                 }
             };
-            console.log(updatedUserData);
             try{
                 await this.$store.dispatch('dashboardModule/updateData', updatedUserData);
                 this.isNoError = true;
@@ -124,21 +128,68 @@ export default {
                 this.isError = true;
             }
         },
-        closeDialog(){
+        closeDialog(param){
             this.isNoError = false;
             this.isError = false;
+            this.confirmDialog = false;
+            this.isUserConfirm = false;
+            if(param != 'cancel'){
+                location.reload();
+            }
         },
+        async confirmClicked(){
+            this.confirmDialog = false;
+            this.isUserConfirm = true;
+            await this.clearAll();
+            location.reload();
+        },
+        totalSum(){
+            let sum = this.monthArr.reduce((a, b) => {
+                return a + b;
+            });
+            this.totalCount = sum;
+        },
+        totalAmount(){
+            this.totalRupee = this.pricePerDiamond * this.totalCount;
+        },
+        clearClick(){
+            this.confirmDialog = true;
+        },
+        async clearAll(){
+            if(this.isUserConfirm){
+                let monthsObj = {};
+                for(let user in this.userDetails){
+                    if(user == 'month'){
+                        monthsObj = JSON.parse(JSON.stringify(this.userDetails[user]))
+                        for(let month in monthsObj){
+                            monthsObj[month] = Array.from({ length: 31 }).fill(0);
+                        }
+                    }
+                }
+                let userId = Object.keys(this.userInfo)[0];
+                let updatedUserData = {
+                    [userId]: {
+                        email: this.userDetails.email,
+                        month: monthsObj,
+                        userName: this.userDetails.userName,
+                    }
+                };
+                try{
+                    await this.$store.dispatch('dashboardModule/updateData', updatedUserData);
+                }
+                catch(err){
+                    console.log(err);
+                }
+            }
+        }
     },
     computed: {
         userDetails(){
-            console.log(this.$store.getters['dashboardModule/userDetails']);
             let responseData = this.$store.getters['dashboardModule/userDetails'];
             let userData = {};
             for(let user in responseData){
                 userData = responseData[user];
             }
-            console.log(userData);
-            console.log(!this.isError);
             return userData;
         },
         userInfo(){
@@ -165,6 +216,7 @@ export default {
 }
 .firstCol, .secondCol{
     flex: 50%;
+    padding: 0px 10px;
 }
 .dateList{
     display: flex;
@@ -174,5 +226,8 @@ export default {
     border: none;
     border-bottom: 1px solid #000000;
     max-width: 100px;
+}
+.topMargin{
+    margin-top: 30px;
 }
 </style>

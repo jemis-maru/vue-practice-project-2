@@ -9,12 +9,20 @@
         <section>
           <slot></slot>
         </section>
-        <menu>
+        <menu v-if="!isConfirm">
           <custom-button v-if="isErr" @click="tryClose">
             Close
           </custom-button>
           <custom-button v-else @click="tryClose">
             <router-link class="routeLinkClass" :to="routePath">{{ btnName }}</router-link>
+          </custom-button>
+        </menu>
+        <menu v-else>
+          <custom-button @click="tryOk">
+            Ok
+          </custom-button>
+          <custom-button @click="tryClose">
+            Cancel
           </custom-button>
         </menu>
       </dialog>
@@ -50,11 +58,18 @@ export default {
       type: Boolean,
       required: true,
     },
+    isConfirm: {
+      type: Boolean,
+      required: false,
+    },
   },
-  emits: ["close"],
+  emits: ["close", "userConfirm"],
   methods: {
     tryClose() {
       this.$emit("close");
+    },
+    tryOk() {
+      this.$emit("userConfirm");
     },
   },
 };

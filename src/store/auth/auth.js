@@ -12,8 +12,6 @@ export default {
         setUser(state, payload){
             state.token = payload.token;
             state.userId = payload.userId;
-            console.log(state.token);
-            console.log(state.userId);
         },
         didAutoLogout(state){
             state.didAutoLogout = true;
@@ -37,13 +35,10 @@ export default {
             const responseData = await response.json();
             
             if(!response.ok){
-                console.log(responseData.error.message);
                 let errMsg = responseData.error.message.replace(/_/gi, " ");
                 const error = new Error(errMsg || 'Authentication failed!');
                 throw error;
             }
-            
-            console.log(responseData);
 
             let dataToRegister = {
                 userName: payload.userName,
@@ -457,7 +452,6 @@ export default {
               });
       
             const responseData1 = await response1.json();
-    
             console.log(responseData1);
         },
         async login(context, payload){
@@ -477,13 +471,10 @@ export default {
             const responseData = await response.json();
             
             if(!response.ok){
-                console.log(responseData.error.message);
                 let errMsg = responseData.error.message.replace(/_/gi, " ");
                 const error = new Error(errMsg || 'Authentication failed!');
                 throw error;
             }
-            
-            console.log(responseData);
             
             const expiresIn = +responseData.expiresIn * 1000;
             // const expiresIn = 5000;
@@ -541,7 +532,6 @@ export default {
     },
     getters: {
         isAuth(state){
-            console.log(!!state.token);
             return !!state.token;
         },
         userId(state){

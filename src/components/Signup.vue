@@ -84,7 +84,6 @@ export default {
                 this.password = '';
                 this.confirmPassword = '';
                 this.isError = err.message || 'Something went wrong!';
-                console.log(this.isError);
             }
         },
         closeDialog(){

@@ -71,7 +71,6 @@ export default {
                 this.email = '';
                 this.password = '';
                 this.isError = err.message || 'Something went wrong!';
-                console.log(this.isError);
             }
         },
         closeDialog(){
