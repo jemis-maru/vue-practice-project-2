@@ -43,7 +43,8 @@
                         <custom-button @click="saveData">Save</custom-button>
                         <custom-button class="topMargin" @click="totalSum">Calculate</custom-button>
                         <p class="topMargin">Total count: {{ totalCount }}</p>
-                        <input class="topMargin" type="number" v-model="pricePerDiamond">
+                        <p class="topMargin">Price of a diamond:</p>
+                        <input type="number" v-model="pricePerDiamond">
                         <custom-button class="topMargin" @click="totalAmount">Total</custom-button>
                         <p class="topMargin">Total amount: {{ totalRupee }}</p>
                         <custom-button :danger="true" class="topMargin" @click="clearClick">Clear All</custom-button>
