@@ -40,12 +40,18 @@
                         </ul>
                     </div>
                     <div class="secondCol">
-                        <custom-button @click="saveData">Save</custom-button>
+                        <p>Advance salary:</p>
+                        <div v-for="(sal, index) in advanceSalaryArr" :key="index">
+                            <input class="advanceSalaryInput" :value="sal" type="number" ref="inputSalary" @input="changeAdvanceSalary(index)">
+                        </div>
+                        <custom-button class="topMargin" @click="saveData">Save</custom-button>
                         <p class="topMargin">Price of a diamond:</p>
                         <input type="number" v-model="pricePerDiamond">
                         <custom-button class="topMargin" @click="totalSum">Calculate</custom-button>
                         <p class="topMargin">Total diamonds: {{ totalCount }}</p>
-                        <p class="topMargin">Total amount: {{ totalRupee }}</p>
+                        <p class="topMargin">Month amount: {{ totalRupee }}</p>
+                        <p class="topMargin">Advance amount: {{ totalAdvanceSalary }}</p>
+                        <p class="topMargin">Final salary: {{ finalSalary }}</p>
                         <custom-button :danger="true" class="topMargin" @click="clearClick">Clear All</custom-button>
                     </div>
                 </div>
@@ -68,13 +74,17 @@ export default {
             selectedMonth: '',
             userId: '',
             monthArr: [],
+            advanceSalaryArr: [],
             isListVisible: false,
             changeCountArr: [],
+            changeAdvanceSalaryArr: [],
             isError: false,
             isNoError: false,
             totalCount: '',
             pricePerDiamond: null,
             totalRupee: '',
+            totalAdvanceSalary: '',
+            finalSalary: '',
             confirmDialog: false,
             isUserConfirm: false,
         };
@@ -98,12 +108,22 @@ export default {
                         }
                     }
                 }
+                if(user == 'advanceSalary'){
+                    for(let month in this.userDetails[user]){
+                        if(this.selectedMonth == month){
+                            this.advanceSalaryArr = this.userDetails[user][month];
+                        }
+                    }
+                }
             }
         },
         changeCount(ind){
             let changeCount = Number(this.$refs.input[ind].value);
             this.changeCountArr[ind] = changeCount;
-            console.log(this.changeCountArr);
+        },
+        changeAdvanceSalary(ind){
+            let changeSalary = Number(this.$refs.inputSalary[ind].value);
+            this.changeAdvanceSalaryArr[ind] = changeSalary;
         },
         async saveData(){
             let monthsObj = {};
@@ -112,13 +132,20 @@ export default {
                     monthsObj = this.userDetails[user];
                 }
             }
-            console.log(this.changeCountArr);
             monthsObj[this.selectedMonth] = this.changeCountArr;
+            let advanceSalaryObj = {};
+            for(let user in this.userDetails){
+                if(user == 'advanceSalary'){
+                    advanceSalaryObj = this.userDetails[user];
+                }
+            }
+            advanceSalaryObj[this.selectedMonth] = this.changeAdvanceSalaryArr;
             let userId = Object.keys(this.userInfo)[0];
             let updatedUserData = {
                 [userId]: {
                     email: this.userDetails.email,
                     month: monthsObj,
+                    advanceSalary: advanceSalaryObj,
                     userName: this.userDetails.userName,
                 }
             };
@@ -150,7 +177,12 @@ export default {
                 return a + b;
             });
             this.totalCount = sum;
+            let advanceSalarySum = this.advanceSalaryArr.reduce((a, b) => {
+                return a + b;
+            });
+            this.totalAdvanceSalary = advanceSalarySum;
             this.totalRupee = this.pricePerDiamond * this.totalCount;
+            this.finalSalary = this.totalRupee - this.totalAdvanceSalary;
         },
         clearClick(){
             this.confirmDialog = true;
@@ -201,6 +233,7 @@ export default {
         this.selectedMonth = localStorage.getItem("month");
         this.monthChange();
         this.changeCountArr = JSON.parse(JSON.stringify(this.monthArr));
+        this.changeAdvanceSalaryArr = JSON.parse(JSON.stringify(this.advanceSalaryArr));
     },
 }
 </script>
@@ -241,5 +274,8 @@ export default {
 }
 .topMargin{
     margin-top: 30px;
+}
+.advanceSalaryInput{
+    margin-top: 10px;
 }
 </style>
