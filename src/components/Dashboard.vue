@@ -190,11 +190,18 @@ export default {
         async clearAll(){
             if(this.isUserConfirm){
                 let monthsObj = {};
+                let advanceSalaryObj = {};
                 for(let user in this.userDetails){
                     if(user == 'month'){
                         monthsObj = JSON.parse(JSON.stringify(this.userDetails[user]))
                         for(let month in monthsObj){
                             monthsObj[month] = Array.from({ length: 31 }).fill(0);
+                        }
+                    }
+                    else if(user == 'advanceSalary'){
+                        advanceSalaryObj = JSON.parse(JSON.stringify(this.userDetails[user]))
+                        for(let month in advanceSalaryObj){
+                            advanceSalaryObj[month] = Array.from({ length: 5 }).fill(0);
                         }
                     }
                 }
@@ -203,6 +210,7 @@ export default {
                     [userId]: {
                         email: this.userDetails.email,
                         month: monthsObj,
+                        advanceSalary: advanceSalaryObj,
                         userName: this.userDetails.userName,
                     }
                 };
