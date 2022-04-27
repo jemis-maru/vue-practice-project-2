@@ -41,11 +41,10 @@
                     </div>
                     <div class="secondCol">
                         <custom-button @click="saveData">Save</custom-button>
-                        <custom-button class="topMargin" @click="totalSum">Calculate</custom-button>
-                        <p class="topMargin">Total count: {{ totalCount }}</p>
                         <p class="topMargin">Price of a diamond:</p>
                         <input type="number" v-model="pricePerDiamond">
-                        <custom-button class="topMargin" @click="totalAmount">Total</custom-button>
+                        <custom-button class="topMargin" @click="totalSum">Calculate</custom-button>
+                        <p class="topMargin">Total diamonds: {{ totalCount }}</p>
                         <p class="topMargin">Total amount: {{ totalRupee }}</p>
                         <custom-button :danger="true" class="topMargin" @click="clearClick">Clear All</custom-button>
                     </div>
@@ -90,6 +89,7 @@ export default {
             this.totalCount = '';
             this.pricePerDiamond = null;
             this.totalRupee = '';
+            localStorage.setItem("month", this.selectedMonth);
             for(let user in this.userDetails){
                 if(user == 'month'){
                     for(let month in this.userDetails[user]){
@@ -102,8 +102,8 @@ export default {
         },
         changeCount(ind){
             let changeCount = Number(this.$refs.input[ind].value);
-            this.changeCountArr = JSON.parse(JSON.stringify(this.monthArr));
             this.changeCountArr[ind] = changeCount;
+            console.log(this.changeCountArr);
         },
         async saveData(){
             let monthsObj = {};
@@ -112,6 +112,7 @@ export default {
                     monthsObj = this.userDetails[user];
                 }
             }
+            console.log(this.changeCountArr);
             monthsObj[this.selectedMonth] = this.changeCountArr;
             let userId = Object.keys(this.userInfo)[0];
             let updatedUserData = {
@@ -149,8 +150,6 @@ export default {
                 return a + b;
             });
             this.totalCount = sum;
-        },
-        totalAmount(){
             this.totalRupee = this.pricePerDiamond * this.totalCount;
         },
         clearClick(){
@@ -197,8 +196,11 @@ export default {
             return this.$store.getters['dashboardModule/userDetails'];
         },
     },
-    created(){
-        this.$store.dispatch('dashboardModule/fetchUserData');
+    async created(){
+        await this.$store.dispatch('dashboardModule/fetchUserData');
+        this.selectedMonth = localStorage.getItem("month");
+        this.monthChange();
+        this.changeCountArr = JSON.parse(JSON.stringify(this.monthArr));
     },
 }
 </script>
@@ -217,10 +219,19 @@ export default {
 }
 .firstCol, .secondCol{
     flex: 50%;
-    padding: 0px 10px;
+    padding: 0px;
+}
+.firstCol{
+    padding-right: 10px;
+    padding-left: 0px;
+    text-align: left;
+}
+.secondCol{
+    padding-left: 10px;
 }
 .dateList{
     display: flex;
+    padding: 0px;
     align-items: center;
 }
 .dateInput{
