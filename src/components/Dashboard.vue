@@ -99,6 +99,8 @@ export default {
             this.totalCount = '';
             this.pricePerDiamond = null;
             this.totalRupee = '';
+            this.totalAdvanceSalary = '';
+            this.finalSalary = '';
             localStorage.setItem("month", this.selectedMonth);
             for(let user in this.userDetails){
                 if(user == 'month'){
