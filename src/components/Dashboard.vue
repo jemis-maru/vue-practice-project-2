@@ -101,6 +101,8 @@ export default {
             this.totalRupee = '';
             this.totalAdvanceSalary = '';
             this.finalSalary = '';
+            this.changeCountArr = [];
+            this.advanceSalaryArr = [];
             localStorage.setItem("month", this.selectedMonth);
             for(let user in this.userDetails){
                 if(user == 'month'){
@@ -118,6 +120,8 @@ export default {
                     }
                 }
             }
+            this.changeCountArr = JSON.parse(JSON.stringify(this.monthArr));
+            this.changeAdvanceSalaryArr = JSON.parse(JSON.stringify(this.advanceSalaryArr));
         },
         changeCount(ind){
             let changeCount = Number(this.$refs.input[ind].value);
@@ -128,35 +132,37 @@ export default {
             this.changeAdvanceSalaryArr[ind] = changeSalary;
         },
         async saveData(){
-            let monthsObj = {};
-            for(let user in this.userDetails){
-                if(user == 'month'){
-                    monthsObj = this.userDetails[user];
+            if(this.changeCountArr.length === 31 && this.changeAdvanceSalaryArr.length === 5){
+                let monthsObj = {};
+                for(let user in this.userDetails){
+                    if(user == 'month'){
+                        monthsObj = this.userDetails[user];
+                    }
                 }
-            }
-            monthsObj[this.selectedMonth] = this.changeCountArr;
-            let advanceSalaryObj = {};
-            for(let user in this.userDetails){
-                if(user == 'advanceSalary'){
-                    advanceSalaryObj = this.userDetails[user];
+                monthsObj[this.selectedMonth] = this.changeCountArr;
+                let advanceSalaryObj = {};
+                for(let user in this.userDetails){
+                    if(user == 'advanceSalary'){
+                        advanceSalaryObj = this.userDetails[user];
+                    }
                 }
-            }
-            advanceSalaryObj[this.selectedMonth] = this.changeAdvanceSalaryArr;
-            let userId = Object.keys(this.userInfo)[0];
-            let updatedUserData = {
-                [userId]: {
-                    email: this.userDetails.email,
-                    month: monthsObj,
-                    advanceSalary: advanceSalaryObj,
-                    userName: this.userDetails.userName,
+                advanceSalaryObj[this.selectedMonth] = this.changeAdvanceSalaryArr;
+                let userId = Object.keys(this.userInfo)[0];
+                let updatedUserData = {
+                    [userId]: {
+                        email: this.userDetails.email,
+                        month: monthsObj,
+                        advanceSalary: advanceSalaryObj,
+                        userName: this.userDetails.userName,
+                    }
+                };
+                try{
+                    await this.$store.dispatch('dashboardModule/updateData', updatedUserData);
+                    this.isNoError = true;
                 }
-            };
-            try{
-                await this.$store.dispatch('dashboardModule/updateData', updatedUserData);
-                this.isNoError = true;
-            }
-            catch(err){
-                this.isError = true;
+                catch(err){
+                    this.isError = true;
+                }
             }
         },
         closeDialog(param){
@@ -183,8 +189,8 @@ export default {
                 return a + b;
             });
             this.totalAdvanceSalary = advanceSalarySum;
-            this.totalRupee = this.pricePerDiamond * this.totalCount;
-            this.finalSalary = this.totalRupee - this.totalAdvanceSalary;
+            this.totalRupee = (this.pricePerDiamond * this.totalCount).toFixed(2);
+            this.finalSalary = (this.totalRupee - this.totalAdvanceSalary).toFixed(2);
         },
         clearClick(){
             this.confirmDialog = true;
